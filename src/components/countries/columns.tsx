@@ -6,19 +6,19 @@ import type { z } from "zod";
 
 export const columns: ColumnDef<z.infer<typeof countryListSchema>[0]>[] = [
   {
-    id: "flagsSvg",
     accessorKey: "flags.svg",
     header: "Flag",
     cell({ row }) {
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={row.getValue("flagsSvg")}
+          src={row.getValue("flags_svg")}
           alt={row.original.flags.alt ?? ""}
           className="w-16 rounded"
         />
       );
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "name.common",
@@ -33,6 +33,7 @@ export const columns: ColumnDef<z.infer<typeof countryListSchema>[0]>[] = [
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "area",
@@ -47,9 +48,20 @@ export const columns: ColumnDef<z.infer<typeof countryListSchema>[0]>[] = [
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "region",
     header: "Region",
+    filterFn: "arrIncludesSome",
+  },
+  {
+    accessorKey: "subregion",
+  },
+  {
+    accessorKey: "independent",
+  },
+  {
+    accessorKey: "unMember",
   },
 ];
