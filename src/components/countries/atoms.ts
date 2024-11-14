@@ -32,7 +32,7 @@ export const globalFilterAtom = atom<string | undefined>();
 // TODO: split out each control into its own atom, recombine in a read only atom that will help us make changes simply
 export const regionFilterAtom = atom<ColumnFilter>({
   id: "region",
-  value: ["Americas", "Antarctic"],
+  value: ["Antarctic", "Americas", "Europe", "Africa", "Asia", "Oceania"],
 });
 
 export const unMemberAtom = atom(false);

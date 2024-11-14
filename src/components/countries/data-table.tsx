@@ -25,19 +25,21 @@ import { useAtom, useAtomValue } from "jotai";
 import { Card, CardContent, CardDescription, CardHeader } from "../ui/card";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { cca3: string }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useAtom(sortingAtom);
   const [globalFilter, setGlobalFilter] = useAtom(globalFilterAtom);
   const columnFilters = useAtomValue(columnFiltersAtom);
+  const router = useRouter();
 
   const table = useReactTable({
     data,
@@ -64,79 +66,80 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  console.log(table.getColumn("region")?.getFacetedUniqueValues());
-  console.log(table.getState().columnFilters);
+  function handleRowClick(name: string) {
+    return () => router.push(`/country/${name}`);
+  }
 
   return (
-    <div className="px-8">
-      <Card className="-mt-16 mx-auto max-w-7xl z-10 relative">
-        <CardHeader className="flex md:flex-row justify-between items-center">
-          <CardDescription className="font-semibold text-base text-muted-foreground">
-            Found {table.getRowCount()} countries
-          </CardDescription>
-          <div className="relative">
-            <Search className="absolute select-none top-2 left-2 text-muted-foreground" />
-            <Input
-              placeholder="Search by Name, Region or Subregion"
-              className="w-80 pl-12"
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-            />
-          </div>
-        </CardHeader>
+    <Card className="-mt-16 mx-auto max-w-7xl z-10 relative">
+      <CardHeader className="flex md:flex-row justify-between items-center">
+        <CardDescription className="font-semibold text-base text-muted-foreground">
+          Found {table.getRowCount()} countries
+        </CardDescription>
+        <div className="relative">
+          <Search className="absolute select-none top-2 left-2 text-muted-foreground" />
+          <Input
+            placeholder="Search by Name, Region or Subregion"
+            className="w-80 pl-12"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+          />
+        </div>
+      </CardHeader>
 
-        <CardContent className="grid grid-cols-[minmax(200px,250px)_1fr] gap-8">
-          <Controls />
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
+      <CardContent className="grid grid-cols-[minmax(200px,250px)_1fr] gap-8">
+        <Controls />
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  className="cursor-pointer"
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={handleRowClick(row.original.cca3)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
